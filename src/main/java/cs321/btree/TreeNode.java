@@ -6,7 +6,6 @@ public class TreeNode {
     
     
     int degree;
-    boolean isleaf;
     ArrayList<TreeObject> nodeObjects;
     ArrayList<TreeNode> childNodes;
 
@@ -15,17 +14,12 @@ public class TreeNode {
      * @param degree the BTree's degree
      * @param isleaf true if the variable is a leaf (will have no children)
      */
-    public TreeNode(int degree, boolean isleaf) {
+    public TreeNode (int degree) {
         this.degree = degree;
-        this.isleaf = isleaf;
-        nodeObjects = new ArrayList<TreeObject>(2 * degree - 1);
-        childNodes = new ArrayList<TreeNode>(2 * degree);
-
-        // Extremely janky fix
-        for (int i = 0; i < 2 * degree; i++) {
-            childNodes.add(null); // placeholders for children
-        }
+        nodeObjects = new ArrayList<TreeObject>(2*degree-1);
+        childNodes = new ArrayList<TreeNode>(2*degree);
     }
+
 
     public void insertObject(TreeObject object){
         nodeObjects.add(object);
@@ -76,19 +70,44 @@ public class TreeNode {
         return childNodes.size();
     }
 
-    public boolean isLeaf(){
-        return isleaf;
+    public ArrayList<TreeNode> getChildren(){
+        return childNodes;
     }
 
-    public void setIsLeaf(boolean isLeaf){
-        this.isleaf = isLeaf;
+    public boolean isLeaf(){
+        return childNodes.isEmpty();
+    }
+
+    public boolean isEmpty(){
+        return childNodes.isEmpty() && nodeObjects.isEmpty();
+    }
+
+    public long getSize(){
+        long count = getNumObjects();
+        for (TreeNode node : childNodes) {
+            count += node.getSize();
+        }
+        return count;
+    }
+
+    public int maxChildren(){
+        return 2*degree;
+    }
+
+    public boolean isFull(){
+        return nodeObjects.size() == maxSize();
+    }
+
+    public int maxSize(){
+        return 2*degree -1;
     }
 
     //smoke test
     public static void main(String[] args) {
-        TreeNode testNode = new TreeNode(2, false);
-        System.out.println(testNode.nodeObjects.size());
+        TreeNode testNode = new TreeNode(2);
     }
+
+
 
 
 
