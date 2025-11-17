@@ -6,11 +6,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 public class BTree implements BTreeInterface
 {
     int degree;
     TreeNode bTreeRoot;
+    private FileChannel file;
+    private ByteBuffer buffer;
 
     /**
      *  Constuctor
@@ -174,5 +178,63 @@ public class BTree implements BTreeInterface
     @Override
     public void delete(String key) {
 
+    }
+
+    public Node diskRead(long diskAddress) throws IOException{
+        if(diskAddress == 0) return null;
+        file.position(diskAddress);
+        buffer.clear();
+        file.read(buffer);
+        buffer.flip();
+        int numObjects = buffer.getInt();
+
+        byte leafFlag = buffer.get();
+        boolean isLeaf = (leafFlag == 1);
+
+        TreeNode node = new TreeNode(degree, isLeaf);
+        node.address = diskAddress;
+
+        for (int i = 0; i < numObjects; i++) {
+             byte[] keyBytes = new byte[64];
+            buffer.get(keyBytes);
+
+            long count = buffer.getLong();
+
+            if (i < numObjects) {
+                int end = 0;
+                while (end < 64 && keyBytes[end] != 0) end++;
+                String key = new String(keyBytes, 0, end, java.nio.charset.StandardCharsets.UTF_8);
+
+                TreeObject obj = new TreeObject(key, count); // adjust constructor
+                node.insertObject(obj);
+            }
+        }
+        return node;
+    }
+
+    public void diskWrite(TreeNode node) throws IOException {
+        file.position(node.address);
+        buffer.clear();
+
+        int n = node.getNumObjects();
+        buffer.putInt(n);
+
+        for (int i = 0; i < n; i++) {
+            TreeObject obj = node.getObject(i);
+            buffer.putInt(obj.getKey().length());
+            buffer.put(obj.getKey().getBytes());
+    }
+        if(node.isLeaf()) {
+            buffer.put((byte) 1);
+        } else {
+            buffer.put((byte) 0);
+            for (int i = 0; i < node.getNumChildren(); i++) {
+                TreeNode child = node.getChild(i);
+                buffer.putLong(child.address);
+            }
+        }
+    
+        buffer.flip();
+        file.write(buffer);
     }
 }
