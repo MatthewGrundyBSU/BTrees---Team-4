@@ -21,6 +21,7 @@ public class TreeNode {
         childNodes = new ArrayList<TreeNode>(2*degree);
     }
 
+
     public void insertObject(TreeObject object){
         nodeObjects.add(object);
     }
@@ -55,7 +56,7 @@ public class TreeNode {
     }
 
     /**
-     * get the number 
+     * get the number of objects in the Node.
      * @return
      */
     public int getNumObjects(){
