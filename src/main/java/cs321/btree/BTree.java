@@ -7,7 +7,7 @@ import java.io.PrintWriter;
 public class BTree implements BTreeInterface
 {
     int degree;
-    ArrayList<bTreeNode> bTreeRoot;
+    TreeNode bTreeRoot;
 
     /**
      *  Constuctor
@@ -17,7 +17,7 @@ public class BTree implements BTreeInterface
             throw new IllegalArgumentException("degree must be greater than 0");
         }
         this.degree = degree;
-        bTreeRoot = new ArrayList<bTreeNode>();
+        //bTreeRoot = new TreeNode(degree, true);
     }
 
     /**
@@ -25,7 +25,7 @@ public class BTree implements BTreeInterface
      */
     @Override
     public long getSize() {
-        return bTreeRoot.length;
+        //return bTreeRoot.length();
     }
 
     /**
@@ -45,10 +45,10 @@ public class BTree implements BTreeInterface
     }
 
     // Recursive method that takes a list of nodes
-    private long recursiveGetNumberOfNodes(ArrayList<bTreeNode> nodes) {
+    private long recursiveGetNumberOfNodes(ArrayList<TreeNode> nodes) {
         long counter = 0;
 
-        for (bTreeNode node : nodes) {
+        for (TreeNode node : nodes) {
             counter += 1; // count this node
             counter += recursiveGetNumberOfNodes(node.children()); // count all children recursively
         }
@@ -91,7 +91,9 @@ public class BTree implements BTreeInterface
 
     //
     private void bTreeSplitRoot() throws IOException {
+        TreeNode oldRoot = this.bTreeRoot;
 
+        TreeNode newRoot = new TreeNode;
     }
     /**
      * Print out all objects in the given BTree in an inorder traversal to a file.
@@ -100,7 +102,7 @@ public class BTree implements BTreeInterface
      */
     @Override
     public void dumpToFile(PrintWriter out) throws IOException {
-
+        return;
     }
 
     /**
