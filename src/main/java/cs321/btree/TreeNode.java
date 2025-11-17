@@ -15,12 +15,17 @@ public class TreeNode {
      * @param degree the BTree's degree
      * @param isleaf true if the variable is a leaf (will have no children)
      */
-    public TreeNode (int degree, boolean isleaf) {
+    public TreeNode(int degree, boolean isleaf) {
         this.degree = degree;
-        nodeObjects = new ArrayList<TreeObject>(2*degree-1);
-        childNodes = new ArrayList<TreeNode>(2*degree);
-    }
+        this.isleaf = isleaf;
+        nodeObjects = new ArrayList<TreeObject>(2 * degree - 1);
+        childNodes = new ArrayList<TreeNode>(2 * degree);
 
+        // Extremely janky fix
+        for (int i = 0; i < 2 * degree; i++) {
+            childNodes.add(null); // placeholders for children
+        }
+    }
 
     public void insertObject(TreeObject object){
         nodeObjects.add(object);
