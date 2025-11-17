@@ -1,6 +1,9 @@
 package cs321.btree;
 
 import java.util.ArrayList;
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -13,19 +16,46 @@ public class BTree implements BTreeInterface
      *  Constuctor
      */
     public BTree(int degree) {
-        if (degree == 0) {
-            throw new IllegalArgumentException("degree must be greater than 0");
+        if (degree <= 1) {
+            throw new IllegalArgumentException("degree must be greater than 1");
         }
         this.degree = degree;
-        //bTreeRoot = new TreeNode(degree, true);
+        bTreeRoot = new TreeNode(degree);
     }
+
+    public BTree(int degree, String fileName) throws BTreeException{
+        this(degree);
+        File file = new File(fileName);
+        try{
+            Scanner scan = new Scanner(file);
+            while (scan.hasNextLine()) {
+                this.insert(new TreeObject(scan.nextLine()));
+            }
+        }catch (FileNotFoundException e){
+            throw new BTreeException("invalid file: "+ e.getMessage());
+        }catch (IOException e) {
+            throw new BTreeException("IOException: " + e.getMessage());
+        }
+        
+
+    }
+
+    public BTree(String fileName)throws BTreeException{
+        this(2048, fileName);
+        
+    }
+
+    public String[] getSortedKeyArray(){
+        return null;
+    }
+
 
     /**
      * @return Returns the number of keys in the BTree.
      */
     @Override
     public long getSize() {
-        //return bTreeRoot.length();
+        return bTreeRoot.getSize();
     }
 
     /**
@@ -45,12 +75,12 @@ public class BTree implements BTreeInterface
     }
 
     // Recursive method that takes a list of nodes
-    private long recursiveGetNumberOfNodes(ArrayList<TreeNode> nodes) {
+    private long recursiveGetNumberOfNodes(TreeNode node) {
         long counter = 0;
-
-        for (TreeNode node : nodes) {
+        ArrayList<TreeNode> children = node.getChildren();
+        for (TreeNode child : children) {
             counter += 1; // count this node
-            counter += recursiveGetNumberOfNodes(node.children()); // count all children recursively
+            counter += recursiveGetNumberOfNodes(child); // count all children recursively
         }
 
         return counter;
@@ -82,7 +112,7 @@ public class BTree implements BTreeInterface
      */
     @Override
     public void insert(TreeObject obj) throws IOException {
-        if (bTreeRoot.size() == (2 * degree)-1 ) {
+        if (bTreeRoot.getSize() == (2 * degree)-1 ) {
             bTreeSplitRoot();
 
         }
@@ -90,10 +120,15 @@ public class BTree implements BTreeInterface
     }
 
     //
+    private void bTreeInsertNonfull(TreeObject obj) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'bTreeInsertNonfull'");
+    }
+
     private void bTreeSplitRoot() throws IOException {
         TreeNode oldRoot = this.bTreeRoot;
 
-        TreeNode newRoot = new TreeNode;
+        TreeNode newRoot = new TreeNode(degree);
     }
     /**
      * Print out all objects in the given BTree in an inorder traversal to a file.
