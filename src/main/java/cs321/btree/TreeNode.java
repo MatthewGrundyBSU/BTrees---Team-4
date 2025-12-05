@@ -8,6 +8,7 @@ public class TreeNode {
     int degree;
     ArrayList<TreeObject> nodeObjects;
     ArrayList<TreeNode> childNodes;
+    public long address;
 
     /**
      * creates a BTree Node with a specified degree.

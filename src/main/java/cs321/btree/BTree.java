@@ -191,7 +191,7 @@ public class BTree implements BTreeInterface
         byte leafFlag = buffer.get();
         boolean isLeaf = (leafFlag == 1);
 
-        TreeNode node = new TreeNode(degree, isLeaf);
+        TreeNode node = new TreeNode(degree);
         node.address = diskAddress;
 
         for (int i = 0; i < numObjects; i++) {
