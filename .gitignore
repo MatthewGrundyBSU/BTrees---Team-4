@@ -23,3 +23,4 @@ build/
 SSH*btree*
 dumps/dump-*
 /TEAMCOORD.txt
+/Test_BTree.tmp
