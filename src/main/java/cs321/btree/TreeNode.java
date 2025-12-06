@@ -99,8 +99,7 @@ public class TreeNode {
         return 2 * degree - 1;
     }
 
-    public static void main(String[] args) {
-        TreeNode testNode = new TreeNode(2);
-        System.out.println("TreeNode created successfully with degree 2");
-    }
+//    public static void main(String[] args) {
+//        TreeNode testNode = new TreeNode(2);
+//    }
 }
