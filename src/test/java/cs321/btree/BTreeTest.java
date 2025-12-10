@@ -35,13 +35,18 @@ public class BTreeTest {
     public static void beforeAll() {
 
         deleteTestFile(testFilename);
+
     }
 
+    private BTree b;
     /**
      * After each test case, remove the test file.
      */
     @After
-    public void cleanUpTests() {
+    public void cleanUpTests() throws IOException {
+        if (b != null) {
+            b.close();
+        }
 
         deleteTestFile(testFilename);
     }
@@ -57,7 +62,7 @@ public class BTreeTest {
     public void testCreate() throws BTreeException{
 
 
-        BTree b = new BTree(testFilename);
+        b = new BTree(testFilename);
 
         //height should be 0
         assertEquals(0, b.getHeight());
@@ -68,6 +73,7 @@ public class BTreeTest {
         //will have only 1 node, the root
         assertEquals(1, b.getNumberOfNodes());
 
+
     }
 
     /**
@@ -76,9 +82,9 @@ public class BTreeTest {
      * @throws BTreeException Exception thrown when BTree encounters an unexpected problem
      */
     @Test
-    public void testCreateDegree () throws BTreeException {
+    public void testCreateDegree () throws BTreeException, IOException {
 
-        BTree b = new BTree(3, testFilename);
+        b = new BTree(3, testFilename);
 
         assertEquals(3, b.getDegree());
 
@@ -96,7 +102,7 @@ public class BTreeTest {
     @Test
     public void testInsertOneKey() throws BTreeException, IOException {
 
-        BTree b = new BTree(2, testFilename);
+        b = new BTree(2, testFilename);
 
         b.insert(new TreeObject("1"));
 
@@ -104,6 +110,7 @@ public class BTreeTest {
         assertEquals(0, b.getHeight());
 
         assertTrue(validateInserts(b, new String[]{"1"}));
+
     }
 
     /**
@@ -115,7 +122,7 @@ public class BTreeTest {
     @Test
     public void testInsertTenKeys() throws BTreeException, IOException{
 
-        BTree b = new BTree(2, testFilename);
+        b = new BTree(2, testFilename);
 
         String[] input = new String[10];
 
@@ -128,6 +135,7 @@ public class BTreeTest {
         assertEquals(2, b.getHeight());
 
         assertTrue(validateInserts(b, input));
+
     }
 
 
@@ -140,7 +148,7 @@ public class BTreeTest {
     @Test
     public void testInsertTenKeysReverseOrder() throws BTreeException, IOException {
 
-        BTree b = new BTree(2, testFilename);
+        b = new BTree(2, testFilename);
 
         String[] input = new String[10];
 
@@ -166,7 +174,7 @@ public class BTreeTest {
     @Test
     public void testInsertTenDuplicates() throws BTreeException, IOException {
 
-        BTree b = new BTree(2, testFilename);
+        b = new BTree(2, testFilename);
 
         for (int i = 0; i < 10; i++) {
             b.insert(new TreeObject(1 + ""));
@@ -188,7 +196,7 @@ public class BTreeTest {
     @Test
     public void testInsertTenThousandObjects() throws BTreeException, IOException {
 
-        BTree b = new BTree(2, testFilename);
+        b = new BTree(2, testFilename);
 
         String[] input = new String[10000];
 
@@ -213,7 +221,7 @@ public class BTreeTest {
     @Test
     public void testCLRSExample18_6() throws BTreeException, IOException {
 
-        BTree b = new BTree(4, testFilename);
+        b = new BTree(4, testFilename);
 
         String[] input = new String[]{"A", "D", "F", "H", "L", "N", "P", "B"};
 
@@ -238,12 +246,13 @@ public class BTreeTest {
      * Search test that queries an empty tree.
      *
      * @throws BTreeException Exception thrown when BTree encounters an unexpected problem
+     * @throws BTreeException Exception thrown when BTree encounters an unexpected problem
      * @throws IOException Exception thrown when testing fails due to IO errors
      */
     @Test
     public void testSearchEmptyTree() throws BTreeException, IOException {
 
-        BTree b = new BTree(2, testFilename);
+        b = new BTree(2, testFilename);
 
         TreeObject t = b.search("1");
 
@@ -265,7 +274,7 @@ public class BTreeTest {
         String key = "1";
         TreeObject t = new TreeObject(key);
 
-        BTree b = new BTree(2, testFilename);
+        b = new BTree(2, testFilename);
 
         b.insert(new TreeObject(key));
 
@@ -288,7 +297,7 @@ public class BTreeTest {
     @Test
     public void testSearchToNotLeaf() throws BTreeException, IOException {
 
-        BTree b = new BTree(2, testFilename); //Different degree than CLRS 18.6!
+        b = new BTree(2, testFilename); //Different degree than CLRS 18.6!
 
         b.insert(new TreeObject("A"));
         b.insert(new TreeObject("D"));
@@ -312,7 +321,7 @@ public class BTreeTest {
 
         String key = "A";
 
-        BTree b = new BTree(2, testFilename);
+        b = new BTree(2, testFilename);
 
         b.insert(new TreeObject(key));
 
@@ -332,7 +341,7 @@ public class BTreeTest {
 
         String duplicateKey = "A";
 
-        BTree b = new BTree(2, testFilename);
+        b = new BTree(2, testFilename);
 
         for (int i = 0; i < 10; i++) {
             b.insert(new TreeObject(duplicateKey));
@@ -371,7 +380,7 @@ public class BTreeTest {
     @Test
     public void testInsertToNotLeaf() throws BTreeException, IOException {
 
-        BTree b = new BTree(4, testFilename);
+        b = new BTree(4, testFilename);
 
         String[] input = new String[]{"A", "D", "F", "H", "L", "N", "P", "B", "H"};
 
@@ -402,7 +411,7 @@ public class BTreeTest {
     @Test
     public void testInsertToNotLeafFullChild() throws BTreeException, IOException {
 
-        BTree b = new BTree(2, testFilename); //Different degree than CLRS 18.6!
+        b = new BTree(2, testFilename); //Different degree than CLRS 18.6!
 
         String[] input = new String[]{"A", "D", "F", "H", "L", "H"};
 

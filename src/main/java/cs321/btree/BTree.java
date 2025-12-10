@@ -11,6 +11,7 @@ public class BTree implements BTreeInterface, AutoCloseable {
     int degree;
     TreeNode bTreeRoot;
     private FileChannel file;
+    private File backingFile;
     private long nextDiskAddress = 0;
     private static final int NODE_SIZE = 4096;
     private ByteBuffer buffer;
@@ -30,16 +31,20 @@ public class BTree implements BTreeInterface, AutoCloseable {
         buffer = ByteBuffer.allocate(NODE_SIZE);
 
         try {
-            File f = new File(fileName);
-            this.file = new RandomAccessFile(f, "rw").getChannel();
 
-            boolean fileHasData = f.exists() && f.length() >= NODE_SIZE;
+
+            backingFile = new File(fileName);
+
+            this.file = new RandomAccessFile(backingFile, "rw").getChannel();
+
+            boolean fileHasData = backingFile.exists() && backingFile.length() >= NODE_SIZE;
 
             if (fileHasData) {
                 this.bTreeRoot = diskRead(0);
                 nextDiskAddress = file.size();
+
             } else {
-                file.truncate(0);
+                backingFile.delete();
                 this.bTreeRoot = new TreeNode(degree);
                 this.bTreeRoot.address = 0;
                 nextDiskAddress = NODE_SIZE;
@@ -52,6 +57,7 @@ public class BTree implements BTreeInterface, AutoCloseable {
             throw new BTreeException("IOException: " + e.getMessage());
         }
     }
+
 
     public BTree(String fileName) throws BTreeException {
         this(2048, fileName);
@@ -90,10 +96,7 @@ public class BTree implements BTreeInterface, AutoCloseable {
     private long getSizeRecursive(TreeNode node) {
         if (node == null) return 0;
 
-        long count = 0;
-        for (TreeObject obj : node.nodeObjects) {
-            count += obj.getCount();
-        }
+        long count = node.nodeObjects.size();
 
         for (int i = 0; i < node.getNumChildren(); i++) {
             TreeNode child = loadChildIfNeeded(node, i);
@@ -221,6 +224,7 @@ public class BTree implements BTreeInterface, AutoCloseable {
         int i = node.getNumObjects() - 1;
 
         TreeObject existingHere = node.getObject(insertedObject);
+
         if (existingHere != null) {
             existingHere.incCount();
             diskWrite(node);
@@ -241,6 +245,13 @@ public class BTree implements BTreeInterface, AutoCloseable {
 
         if (child.isFull()) {
             bTreeSplitChild(node, i);
+
+            if (insertedObject.compareTo(node.getObject(i)) == 0) {
+                node.getObject(i).incCount();
+                diskWrite(node);
+                return;
+            }
+
             if (insertedObject.compareTo(node.getObject(i)) > 0) i++;
             child = loadChildIfNeeded(node, i);
         }
@@ -254,21 +265,21 @@ public class BTree implements BTreeInterface, AutoCloseable {
     @Override
     public void dumpToDatabase(String dbName, String tableName) throws IOException {}
 
+
     @Override
     public void close() throws IOException {
         if (file != null && file.isOpen()) {
             file.close();
         }
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            close();
-        } finally {
-            super.finalize();
+        if (backingFile != null && backingFile.exists()) {
+            boolean deleted = backingFile.delete();
+            if (!deleted) {
+                System.err.println("Warning: Could not delete backing file " + backingFile.getAbsolutePath());
+            }
         }
     }
+
+
 
     @Override
     public TreeObject search(String key) throws IOException {
