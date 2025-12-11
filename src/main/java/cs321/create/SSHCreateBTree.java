@@ -19,9 +19,13 @@ public class SSHCreateBTree {
      */
     public static void main(String[] args) throws Exception 
 	{
-		System.out.println("Hello world from cs321.create.SSHCreateBTree.main");
+		// System.out.println("Hello world from cs321.create.SSHCreateBTree.main");
         SSHCreateBTreeArguments myArgs = parseArguments(args);
-        // other code    
+        // other code 
+        BTree btree = new BTree(myArgs.getDegree(), myArgs.getSSHFileName());
+        btree.dumpToDatabase("jdbc:sqlite:SSHLogDB.db", "SSHLog");
+        btree.close();
+        
 	}
 
 
@@ -31,7 +35,9 @@ public class SSHCreateBTree {
      */
     public static SSHCreateBTreeArguments parseArguments(String[] args) throws ParseArgumentException
     {
-        return null;
+        SSHCreateBTreeArguments bta = new SSHCreateBTreeArguments(Boolean.parseBoolean(args[0]), Integer.parseInt(args[1]), args[2], args[3], Integer.parseInt(args[4]), Integer.parseInt(args[4]));
+
+        return bta;
     }
 
 
@@ -41,6 +47,7 @@ public class SSHCreateBTree {
 	 */
 	private static void printUsageAndExit(String errorMessage)
     {
+        System.err.println(errorMessage);
         System.exit(1);
 	}
 

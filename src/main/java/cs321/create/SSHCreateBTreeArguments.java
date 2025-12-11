@@ -51,4 +51,24 @@ public class SSHCreateBTreeArguments
                 ", debugLevel=" + debugLevel +
                 '}';
     }
+
+    public int getDegree(){
+        return degree;
+    }
+
+    public String getSSHFileName(){
+        return SSHFileName;
+    }
+
+    public boolean getUseCache(){
+        return useCache;
+    }
+
+    public String getTreeType(){
+        return treeType;
+    }
+
+    public int getDebugLevel(){
+        return debugLevel;
+    }
 }
