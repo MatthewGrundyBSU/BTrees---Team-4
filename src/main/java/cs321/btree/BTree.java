@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.sql.*;
 
 public class BTree implements BTreeInterface, AutoCloseable {
 
@@ -260,10 +261,49 @@ public class BTree implements BTreeInterface, AutoCloseable {
     }
 
     @Override
-    public void dumpToFile(PrintWriter out) throws IOException {}
+    public void dumpToFile(PrintWriter out) throws IOException {
+        ArrayList<String> k = new ArrayList<String>(); 
+        inOrderTraversal(bTreeRoot, k);
+        for (String s : k){
+            out.println(s);
+        }
+    }
+
+    
 
     @Override
-    public void dumpToDatabase(String dbName, String tableName) throws IOException {}
+    public void dumpToDatabase(String dbName, String tableName) throws IOException {
+        ArrayList<String> k = new ArrayList<String>(); 
+        inOrderTraversal(bTreeRoot, k);
+        Connection connection = null;
+        try {
+            connection = DriverManager.getConnection(dbName);
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
+            statement.executeUpdate("drop table if exists " + tableName);
+            statement.executeUpdate("create table " + tableName + " (id integer, data string)");
+            for (int i = 0; i < k.size(); i++) {
+                statement.executeUpdate("insert into " + tableName + " values(" + i + ", '" + k.get(i) + "')");
+            }
+            
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        finally
+        {
+          try
+          {
+            if(connection != null)
+              connection.close();
+          }
+          catch(SQLException e)
+          {
+            // connection close failed.
+            System.err.println(e.getMessage());
+          }
+        }
+
+    }
 
 
     @Override
