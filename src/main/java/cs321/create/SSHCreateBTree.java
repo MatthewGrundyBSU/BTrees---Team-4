@@ -1,5 +1,7 @@
 package cs321.create;
 
+import java.io.PrintWriter;
+
 import cs321.btree.BTree;
 import cs321.btree.BTreeException;
 import cs321.btree.TreeObject;
@@ -19,18 +21,17 @@ public class SSHCreateBTree {
      */
     public static void main(String[] args) throws Exception 
 	{
-        if (args.length == 0){
-            System.out.println("java -jar build/libs/SSHCreateBTree.jar --cache=<0/1> --degree=<btree-degree> \\\r\n" + //
-                                "          --sshFile=<ssh-File> --type=<tree-type> [--cache-size=<n>] \\\r\n" + //
-                                "          --database=<yes/no> [--debug=<0|1>]");
-            return;
-        }
-		// System.out.println("Hello world from cs321.create.SSHCreateBTree.main");
+        
+		System.out.println("Hello world from cs321.create.SSHCreateBTree.main");
         SSHCreateBTreeArguments myArgs = parseArguments(args);
-        // other code 
+        boolean dumpToDatabase = getOpt("--database=", args).equals("yes");
+
         BTree btree = new BTree(myArgs.getDegree(), myArgs.getSSHFileName());
-        btree.dumpToDatabase("jdbc:sqlite:SSHLogDB.db", "SSHLog");
-        // btree.dumpToFile();
+        if (dumpToDatabase){
+            btree.dumpToDatabase("jdbc:sqlite:SSHLogDB.db", "SSHLog");
+        }
+        
+        btree.dumpToFile(new PrintWriter("SSH_log.txt.ssh.btree."+ myArgs.getTreeType() +"." + myArgs.getDegree()));
         btree.close();
         
 	}
@@ -42,12 +43,16 @@ public class SSHCreateBTree {
      */
     public static SSHCreateBTreeArguments parseArguments(String[] args) throws ParseArgumentException
     {
-        int degree;
+        int degree = 0;
         try{
             degree = Integer.parseInt(getOpt("--degree=", args));
         }catch(Exception e){
             // System.err.println(e.getMessage());
             degree = 0;
+        }finally {
+            if (degree == 0){
+                degree = (4096 - 8) / 12;
+            }
         }
 
         boolean cache;
