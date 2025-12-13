@@ -2,7 +2,7 @@ package cs321.btree;
 
 import java.util.ArrayList;
 
-public class TreeNode {
+public class TreeNode implements KeyInterface<Long> {
 
     int degree;
     ArrayList<TreeObject> nodeObjects;
@@ -99,7 +99,17 @@ public class TreeNode {
         return 2 * degree - 1;
     }
 
-//    public static void main(String[] args) {
-//        TreeNode testNode = new TreeNode(2);
-//    }
+    /**
+     * Implementation of KeyInterface to support caching.
+     * The disk address serves as the unique key for each node.
+     */
+    @Override
+    public Long getKey() {
+        return address;
+    }
+
+    public static void main(String[] args) {
+        TreeNode testNode = new TreeNode(2);
+        System.out.println("TreeNode created successfully with degree 2");
+    }
 }

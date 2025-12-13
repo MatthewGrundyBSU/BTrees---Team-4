@@ -16,6 +16,8 @@ public class BTree implements BTreeInterface, AutoCloseable {
     private long nextDiskAddress = 0;
     private static final int NODE_SIZE = 4096;
     private ByteBuffer buffer;
+    private Cache<Long, TreeNode> cache;
+    private boolean useCache;
 
     public BTree(int degree) {
         if (degree <= 1) throw new IllegalArgumentException("degree must be > 1");
@@ -24,18 +26,28 @@ public class BTree implements BTreeInterface, AutoCloseable {
         buffer = ByteBuffer.allocate(NODE_SIZE);
         bTreeRoot.address = 0;
         nextDiskAddress = NODE_SIZE;
+        this.useCache = false;
     }
 
     public BTree(int degree, String fileName) throws BTreeException {
+        this(degree, fileName, 0);
+    }
+
+    public BTree(int degree, String fileName, int cacheSize) throws BTreeException {
         if (degree <= 1) throw new IllegalArgumentException("degree must be > 1");
         this.degree = degree;
         buffer = ByteBuffer.allocate(NODE_SIZE);
 
+        // Initialize cache if cacheSize > 0
+        if (cacheSize > 0) {
+            this.cache = new Cache<>(cacheSize);
+            this.useCache = true;
+        } else {
+            this.useCache = false;
+        }
+
         try {
-
-
             backingFile = new File(fileName);
-
             this.file = new RandomAccessFile(backingFile, "rw").getChannel();
 
             boolean fileHasData = backingFile.exists() && backingFile.length() >= NODE_SIZE;
@@ -43,7 +55,6 @@ public class BTree implements BTreeInterface, AutoCloseable {
             if (fileHasData) {
                 this.bTreeRoot = diskRead(0);
                 nextDiskAddress = file.size();
-
             } else {
                 backingFile.delete();
                 this.bTreeRoot = new TreeNode(degree);
@@ -58,7 +69,6 @@ public class BTree implements BTreeInterface, AutoCloseable {
             throw new BTreeException("IOException: " + e.getMessage());
         }
     }
-
 
     public BTree(String fileName) throws BTreeException {
         this(2048, fileName);
@@ -262,18 +272,16 @@ public class BTree implements BTreeInterface, AutoCloseable {
 
     @Override
     public void dumpToFile(PrintWriter out) throws IOException {
-        ArrayList<String> k = new ArrayList<String>(); 
+        ArrayList<String> k = new ArrayList<String>();
         inOrderTraversal(bTreeRoot, k);
-        for (String s : k){
+        for (String s : k) {
             out.println(s);
         }
     }
 
-    
-
     @Override
     public void dumpToDatabase(String dbName, String tableName) throws IOException {
-        ArrayList<String> k = new ArrayList<String>(); 
+        ArrayList<String> k = new ArrayList<String>();
         inOrderTraversal(bTreeRoot, k);
         Connection connection = null;
         try {
@@ -285,29 +293,24 @@ public class BTree implements BTreeInterface, AutoCloseable {
             for (int i = 0; i < k.size(); i++) {
                 statement.executeUpdate("insert into " + tableName + " values(" + i + ", '" + k.get(i) + "')");
             }
-            
+
         } catch (SQLException e) {
             System.err.println(e.getMessage());
+        } finally {
+            try {
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                System.err.println(e.getMessage());
+            }
         }
-        finally
-        {
-          try
-          {
-            if(connection != null)
-              connection.close();
-          }
-          catch(SQLException e)
-          {
-            // connection close failed.
-            System.err.println(e.getMessage());
-          }
-        }
-
     }
-
 
     @Override
     public void close() throws IOException {
+        if (cache != null) {
+            cache.clear();
+        }
         if (file != null && file.isOpen()) {
             file.close();
         }
@@ -318,8 +321,6 @@ public class BTree implements BTreeInterface, AutoCloseable {
             }
         }
     }
-
-
 
     @Override
     public TreeObject search(String key) throws IOException {
@@ -342,7 +343,8 @@ public class BTree implements BTreeInterface, AutoCloseable {
     }
 
     @Override
-    public void delete(String key) {}
+    public void delete(String key) {
+    }
 
     private TreeNode loadChildIfNeeded(TreeNode parent, int childIndex) {
         if (childIndex >= parent.childAddresses.size()) {
@@ -370,6 +372,15 @@ public class BTree implements BTreeInterface, AutoCloseable {
     }
 
     public TreeNode diskRead(long diskAddress) throws IOException {
+        // Check cache first if caching is enabled
+        if (useCache) {
+            TreeNode cached = cache.get(diskAddress);
+            if (cached != null) {
+                return cached;
+            }
+        }
+
+        // Not in cache, read from disk
         buffer.clear();
         for (int i = 0; i < NODE_SIZE; i++) {
             buffer.put((byte) 0);
@@ -416,6 +427,13 @@ public class BTree implements BTreeInterface, AutoCloseable {
                 long childAddr = buffer.getLong();
                 node.childAddresses.add(childAddr);
             }
+        }
+
+        // Add to cache if caching is enabled
+        if (useCache) {
+            TreeNode evicted = cache.add(node);
+            // If a node was evicted, we could write it to disk here if it was modified
+            // For now, we assume all modified nodes are written immediately via diskWrite
         }
 
         return node;
@@ -475,5 +493,13 @@ public class BTree implements BTreeInterface, AutoCloseable {
         buffer.flip();
         file.position(node.address);
         file.write(buffer);
+
+
+        if (useCache) {
+
+            cache.remove(node.address);
+
+            cache.add(node);
+        }
     }
 }
