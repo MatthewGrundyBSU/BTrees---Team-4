@@ -1,28 +1,31 @@
-### Team Name
-## Team Members
+### Team 4 
+## Matthew Grundy, Nathan Dunlap, Cody Toone
 
 | Last Name | First Name | GitHub User Name |
-|-----------|------------|------------------|
-| TBD       | TBD        | TBD              |
-| TBD       | TBD        | TBD              |
-| TBD       | TBD        | TBD              |
+|----------|------------|------------------|
+| Grundy   | Matthew    | MatthewGrundyBSU |
+| Toone    | Cody       | codyt-bsu        |
+| Dunlap   | Nathan     | Nathan-Dunlap    |
 
 # Test Results
-How many of the dumpfiles matched (using the check-dump-files.sh script)?
-
-How many of the btree query files results matched (using the check-btree-search.sh script)?
-
-How many of the database query files results matched (using the check-db-search.sh script)?
+    Due to some errors with the code none of the tests passed due to no output.
 
 
 # AWS Notes
-Brief reflection on your experience with running your code on AWS.
+AWS worked out well. And we had no issues, it ran perfectly. We ran search instead of create due to project completion.
+
 
 # Reflection
 
 Provide a reflection by each of the team member (in a separate subsection)
 
-## Reflection (Team member name: )
+## Reflection (MatthewGrundyBSU )
+    This project was very rough. I did most of BTree, AWS, and Documentation. Btree went very well, both the main class 
+    and the cache implementation worked fine. AWS went well as I discussed earlier we did it in a group call and it took an hour
+    but it worked out in the end. Documentation was were it went bad, I'll be honest we only did the work that was in the project 
+    checkpoints and didn't realize we had to do a readme. That leads us to the teamwork side of things and I think this is where 
+    things went wrong. We were very inflexible with the work, everyone had a lane and we just continued down them, we didn't try to course correct.
+    Which is why I think project completion ended up so poor.
 ## Reflection (Team member name: )
 ## Reflection (Team member name: )
 
